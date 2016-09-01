@@ -1,0 +1,187 @@
+;; gorilla-repl.fileformat = 1
+
+;; **
+;;; # "what I'm reading" analysis
+;;; 
+;;; From July/2015 to July/2016 I wrote one post a week, collecting various links I had been reading, and pulling out relevant passages from the articles into quotes.
+;;; 
+;;; This is a quick trend analysis of these posts using [Instaparse](https://github.com/Engelberg/instaparse) and [Gorilla-REPL](http://gorilla-repl.org/).
+;; **
+
+;; @@
+(ns fluttering-foliage
+  (:require [gorilla-plot.core :as plot]
+            [gorilla-repl.table :as table]
+            [stats.core :as stats])) ;; parsing and analysis functions
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-nil'>nil</span>","value":"nil"}
+;; <=
+
+;; @@
+;; an example parse tree from a post
+;;
+;; see stats.core `rl-parser` to see the parser itself
+;;
+;; pt is just a function that allows me to load and parse posts in one go. Takes an optional arg for how many posts to load.
+;; -1 loads all posts 
+;;
+;; a post is a collection of links
+;; links have 0 or more quotes, which are "pull quotes" from the linked data
+
+(->> (stats/pt 1)
+     clojure.pprint/pprint)
+;; @@
+;; ->
+;;; ({:prelude
+;;;   {:title &quot;What I&#x27;m reading 7/18-7/25&quot;, :CREATED &quot;2015-07-26&quot;},
+;;;   :items
+;;;   ({:link
+;;;     {:link_title &quot;Things Will Not Change&quot;,
+;;;      :url &quot;https://tobiastom.name/articles/things-will-not-change&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;As you might have guessed from the lines above, I’m not particular happy with the current way our industry is working. I know that I’m not alone with this opinion, but this article is about bringing my frustration to an end. I accept that I cannot change anything with complaints.\&quot;&quot;
+;;;      &quot;\&quot;Stop talking about tools, stop being a smart ass about why something should have been done differently. We are all responsible for making it a place for happiness and creation again.\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title &quot;We are data: the future of machine intelligence&quot;,
+;;;      :url
+;;;      &quot;http://www.ft.com/cms/s/2/475789b8-2b2b-11e5-acfb-cbd2e1c81cca.html&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;What they never could have told you 20 years ago, though, is how boring and intense and unrelenting this sort of capitalist micro-assault is, from all directions at all waking moments, and how, 20 years later, it only shows signs of getting much more intense, focused, targeted, unyielding and galactically more boring.\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title &quot;WHY IS THERE NO ADVERTISING ON TEXTFILES.COM?&quot;,
+;;;      :url &quot;http://www.textfiles.com/thoughts/advertising.html&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;They look at every spare moment of life as a potential to sell you a product. Every square inch of unused space is a place where an ad should be. Every last bit of meaning in the world should be \&quot;presented by\&quot; a corporate entity.\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title &quot;Technology is run by the wrong people&quot;,
+;;;      :url
+;;;      &quot;https://michaelochurch.wordpress.com/2015/07/18/technology-is-run-by-the-wrong-people/&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;In 2015, we live in a time of broad-based and pervasive organizational decline. While Silicon Valley champions all that is “startup”, another way to perceive the accelerated birth-and-death cycle of organizations is that they’ve become shorter-lived and more disposable in general.\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title &quot;Bret Victor - The Future of Programming&quot;,
+;;;      :url &quot;https://vimeo.com/71278954&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;The real tragedy would be if people forgot you could have new ideas about programming models in the first place.\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title &quot;Functional XML editing using zippers in Clojure&quot;,
+;;;      :url
+;;;      &quot;http://ravi.pckl.me/short/functional-xml-editing-using-zippers-in-clojure/&quot;},
+;;;     :quotes ()}
+;;;    {:link
+;;;     {:link_title &quot;How Sushi Are You: 2015&quot;,
+;;;      :url
+;;;      &quot;http://www.sushiwithmygirls.com/uncategorized/how-sushi-are-you-2015/&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;And #UGH! do these pics get a ton of cheap LIKES…#JEAL\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title
+;;;      &quot;Mesh - Responsive Grid &amp; Typography in Clojurescript&quot;,
+;;;      :url &quot;https://github.com/facjure/mesh&quot;},
+;;;     :quotes (&quot;\&quot;Web Design is 95% Typography\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title
+;;;      &quot;Tesser - Clojure reducers, but for parallel execution: locally and on distributed systems.&quot;,
+;;;      :url &quot;https://github.com/aphyr/tesser&quot;},
+;;;     :quotes ()}
+;;;    {:link
+;;;     {:link_title
+;;;      &quot;Is Advertising Morally Justifiable? The Importance of Protecting Our Attention&quot;,
+;;;      :url
+;;;      &quot;http://www.abc.net.au/religion/articles/2015/07/14/4273200.htm&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;The result is not only that it has become morally acceptable to sell off other people&#x27;s attention without their consent in the name of free market economics. But, in addition, anyone who refuses to do so is considered an economic idiot - someone who leaves money on the table.\&quot;&quot;)}
+;;;    {:link
+;;;     {:link_title &quot;William Gass, The Art of Fiction No. 65&quot;,
+;;;      :url
+;;;      &quot;http://www.theparisreview.org/interviews/3576/the-art-of-fiction-no-65-william-gass&quot;},
+;;;     :quotes
+;;;     (&quot;\&quot;Type has no drawl.\&quot;&quot;
+;;;      &quot;\&quot;These beliefs and these forms have to do with the security and insecurity of going forward into the void.\&quot;&quot;)})})
+;;; 
+;; <-
+;; =>
+;;; {"type":"html","content":"<span class='clj-nil'>nil</span>","value":"nil"}
+;; <=
+
+;; @@
+;; number of links per post, by week, ascending order
+
+;; we can see that I get lazier as the project goes on, in terms of finding interesting links
+
+(plot/list-plot (->> (stats/pt -1)
+                     (sort-by #(get-in % [:prelude :CREATED]))
+                     (sequence stats/items-count))
+                :joined true)
+;; @@
+;; =>
+;;; {"type":"vega","content":{"width":400,"height":247.2187957763672,"padding":{"top":10,"left":55,"bottom":40,"right":10},"data":[{"name":"66435f95-fa24-467e-9907-dca03e6541f9","values":[{"x":0,"y":11},{"x":1,"y":11},{"x":2,"y":8},{"x":3,"y":13},{"x":4,"y":16},{"x":5,"y":15},{"x":6,"y":8},{"x":7,"y":9},{"x":8,"y":9},{"x":9,"y":11},{"x":10,"y":5},{"x":11,"y":15},{"x":12,"y":9},{"x":13,"y":7},{"x":14,"y":13},{"x":15,"y":7},{"x":16,"y":8},{"x":17,"y":13},{"x":18,"y":12},{"x":19,"y":11},{"x":20,"y":9},{"x":21,"y":10},{"x":22,"y":15},{"x":23,"y":10},{"x":24,"y":7},{"x":25,"y":6},{"x":26,"y":9},{"x":27,"y":6},{"x":28,"y":9},{"x":29,"y":4},{"x":30,"y":11},{"x":31,"y":7},{"x":32,"y":6},{"x":33,"y":5},{"x":34,"y":9},{"x":35,"y":9},{"x":36,"y":10},{"x":37,"y":6},{"x":38,"y":7},{"x":39,"y":9},{"x":40,"y":10},{"x":41,"y":8},{"x":42,"y":7},{"x":43,"y":10},{"x":44,"y":8},{"x":45,"y":8},{"x":46,"y":8},{"x":47,"y":6},{"x":48,"y":8},{"x":49,"y":5},{"x":50,"y":5},{"x":51,"y":3}]}],"marks":[{"type":"line","from":{"data":"66435f95-fa24-467e-9907-dca03e6541f9"},"properties":{"enter":{"x":{"scale":"x","field":"data.x"},"y":{"scale":"y","field":"data.y"},"stroke":{"value":"#FF29D2"},"strokeWidth":{"value":2},"strokeOpacity":{"value":1}}}}],"scales":[{"name":"x","type":"linear","range":"width","zero":false,"domain":{"data":"66435f95-fa24-467e-9907-dca03e6541f9","field":"data.x"}},{"name":"y","type":"linear","range":"height","nice":true,"zero":false,"domain":{"data":"66435f95-fa24-467e-9907-dca03e6541f9","field":"data.y"}}],"axes":[{"type":"x","scale":"x"},{"type":"y","scale":"y"}]},"value":"#gorilla_repl.vega.VegaView{:content {:width 400, :height 247.2188, :padding {:top 10, :left 55, :bottom 40, :right 10}, :data [{:name \"66435f95-fa24-467e-9907-dca03e6541f9\", :values ({:x 0, :y 11} {:x 1, :y 11} {:x 2, :y 8} {:x 3, :y 13} {:x 4, :y 16} {:x 5, :y 15} {:x 6, :y 8} {:x 7, :y 9} {:x 8, :y 9} {:x 9, :y 11} {:x 10, :y 5} {:x 11, :y 15} {:x 12, :y 9} {:x 13, :y 7} {:x 14, :y 13} {:x 15, :y 7} {:x 16, :y 8} {:x 17, :y 13} {:x 18, :y 12} {:x 19, :y 11} {:x 20, :y 9} {:x 21, :y 10} {:x 22, :y 15} {:x 23, :y 10} {:x 24, :y 7} {:x 25, :y 6} {:x 26, :y 9} {:x 27, :y 6} {:x 28, :y 9} {:x 29, :y 4} {:x 30, :y 11} {:x 31, :y 7} {:x 32, :y 6} {:x 33, :y 5} {:x 34, :y 9} {:x 35, :y 9} {:x 36, :y 10} {:x 37, :y 6} {:x 38, :y 7} {:x 39, :y 9} {:x 40, :y 10} {:x 41, :y 8} {:x 42, :y 7} {:x 43, :y 10} {:x 44, :y 8} {:x 45, :y 8} {:x 46, :y 8} {:x 47, :y 6} {:x 48, :y 8} {:x 49, :y 5} {:x 50, :y 5} {:x 51, :y 3})}], :marks [{:type \"line\", :from {:data \"66435f95-fa24-467e-9907-dca03e6541f9\"}, :properties {:enter {:x {:scale \"x\", :field \"data.x\"}, :y {:scale \"y\", :field \"data.y\"}, :stroke {:value \"#FF29D2\"}, :strokeWidth {:value 2}, :strokeOpacity {:value 1}}}}], :scales [{:name \"x\", :type \"linear\", :range \"width\", :zero false, :domain {:data \"66435f95-fa24-467e-9907-dca03e6541f9\", :field \"data.x\"}} {:name \"y\", :type \"linear\", :range \"height\", :nice true, :zero false, :domain {:data \"66435f95-fa24-467e-9907-dca03e6541f9\", :field \"data.y\"}}], :axes [{:type \"x\", :scale \"x\"} {:type \"y\", :scale \"y\"}]}}"}
+;; <=
+
+;; @@
+;; total number of links per post, aggregated by how many posts have that number of total links
+
+;; they seem to distribute normally around 8-10 links per post
+
+(plot/histogram (->> (stats/pt -1)
+                     (sort-by #(get-in % [:prelude :CREATED]))
+                     (sequence stats/items-count))
+                :bins 8)
+;; @@
+;; =>
+;;; {"type":"vega","content":{"width":400,"height":247.2187957763672,"padding":{"top":10,"left":55,"bottom":40,"right":10},"data":[{"name":"beea5112-b8c1-4484-a63c-7a0ff1722e0a","values":[{"x":3.0,"y":0},{"x":4.625,"y":2.0},{"x":6.25,"y":9.0},{"x":7.875,"y":6.0},{"x":9.5,"y":17.0},{"x":11.125,"y":10.0},{"x":12.75,"y":1.0},{"x":14.375,"y":3.0},{"x":16.0,"y":3.0},{"x":17.625,"y":1.0},{"x":19.25,"y":0}]}],"marks":[{"type":"line","from":{"data":"beea5112-b8c1-4484-a63c-7a0ff1722e0a"},"properties":{"enter":{"x":{"scale":"x","field":"data.x"},"y":{"scale":"y","field":"data.y"},"interpolate":{"value":"step-before"},"fill":{"value":"steelblue"},"fillOpacity":{"value":0.4},"stroke":{"value":"steelblue"},"strokeWidth":{"value":2},"strokeOpacity":{"value":1}}}}],"scales":[{"name":"x","type":"linear","range":"width","zero":false,"domain":{"data":"beea5112-b8c1-4484-a63c-7a0ff1722e0a","field":"data.x"}},{"name":"y","type":"linear","range":"height","nice":true,"zero":false,"domain":{"data":"beea5112-b8c1-4484-a63c-7a0ff1722e0a","field":"data.y"}}],"axes":[{"type":"x","scale":"x"},{"type":"y","scale":"y"}]},"value":"#gorilla_repl.vega.VegaView{:content {:width 400, :height 247.2188, :padding {:top 10, :left 55, :bottom 40, :right 10}, :data [{:name \"beea5112-b8c1-4484-a63c-7a0ff1722e0a\", :values ({:x 3.0, :y 0} {:x 4.625, :y 2.0} {:x 6.25, :y 9.0} {:x 7.875, :y 6.0} {:x 9.5, :y 17.0} {:x 11.125, :y 10.0} {:x 12.75, :y 1.0} {:x 14.375, :y 3.0} {:x 16.0, :y 3.0} {:x 17.625, :y 1.0} {:x 19.25, :y 0})}], :marks [{:type \"line\", :from {:data \"beea5112-b8c1-4484-a63c-7a0ff1722e0a\"}, :properties {:enter {:x {:scale \"x\", :field \"data.x\"}, :y {:scale \"y\", :field \"data.y\"}, :interpolate {:value \"step-before\"}, :fill {:value \"steelblue\"}, :fillOpacity {:value 0.4}, :stroke {:value \"steelblue\"}, :strokeWidth {:value 2}, :strokeOpacity {:value 1}}}}], :scales [{:name \"x\", :type \"linear\", :range \"width\", :zero false, :domain {:data \"beea5112-b8c1-4484-a63c-7a0ff1722e0a\", :field \"data.x\"}} {:name \"y\", :type \"linear\", :range \"height\", :nice true, :zero false, :domain {:data \"beea5112-b8c1-4484-a63c-7a0ff1722e0a\", :field \"data.y\"}}], :axes [{:type \"x\", :scale \"x\"} {:type \"y\", :scale \"y\"}]}}"}
+;; <=
+
+;; @@
+;; total number of quotes per post, by week, ascending order
+
+(plot/list-plot (->> (stats/pt -1)
+                     (sort-by #(get-in % [:prelude :CREATED]))
+                     (sequence stats/quote-count-per-post))
+                :joined true)
+;; @@
+;; =>
+;;; {"type":"vega","content":{"width":400,"height":247.2187957763672,"padding":{"top":10,"left":55,"bottom":40,"right":10},"data":[{"name":"078610a8-90de-45cf-8f3e-17a01e422468","values":[{"x":0,"y":11},{"x":1,"y":15},{"x":2,"y":16},{"x":3,"y":37},{"x":4,"y":37},{"x":5,"y":27},{"x":6,"y":25},{"x":7,"y":16},{"x":8,"y":12},{"x":9,"y":16},{"x":10,"y":11},{"x":11,"y":19},{"x":12,"y":13},{"x":13,"y":10},{"x":14,"y":25},{"x":15,"y":14},{"x":16,"y":10},{"x":17,"y":18},{"x":18,"y":14},{"x":19,"y":17},{"x":20,"y":13},{"x":21,"y":16},{"x":22,"y":40},{"x":23,"y":19},{"x":24,"y":20},{"x":25,"y":15},{"x":26,"y":20},{"x":27,"y":11},{"x":28,"y":23},{"x":29,"y":10},{"x":30,"y":20},{"x":31,"y":17},{"x":32,"y":12},{"x":33,"y":10},{"x":34,"y":13},{"x":35,"y":30},{"x":36,"y":23},{"x":37,"y":13},{"x":38,"y":12},{"x":39,"y":19},{"x":40,"y":17},{"x":41,"y":21},{"x":42,"y":16},{"x":43,"y":22},{"x":44,"y":18},{"x":45,"y":21},{"x":46,"y":19},{"x":47,"y":12},{"x":48,"y":19},{"x":49,"y":11},{"x":50,"y":11},{"x":51,"y":6}]}],"marks":[{"type":"line","from":{"data":"078610a8-90de-45cf-8f3e-17a01e422468"},"properties":{"enter":{"x":{"scale":"x","field":"data.x"},"y":{"scale":"y","field":"data.y"},"stroke":{"value":"#FF29D2"},"strokeWidth":{"value":2},"strokeOpacity":{"value":1}}}}],"scales":[{"name":"x","type":"linear","range":"width","zero":false,"domain":{"data":"078610a8-90de-45cf-8f3e-17a01e422468","field":"data.x"}},{"name":"y","type":"linear","range":"height","nice":true,"zero":false,"domain":{"data":"078610a8-90de-45cf-8f3e-17a01e422468","field":"data.y"}}],"axes":[{"type":"x","scale":"x"},{"type":"y","scale":"y"}]},"value":"#gorilla_repl.vega.VegaView{:content {:width 400, :height 247.2188, :padding {:top 10, :left 55, :bottom 40, :right 10}, :data [{:name \"078610a8-90de-45cf-8f3e-17a01e422468\", :values ({:x 0, :y 11} {:x 1, :y 15} {:x 2, :y 16} {:x 3, :y 37} {:x 4, :y 37} {:x 5, :y 27} {:x 6, :y 25} {:x 7, :y 16} {:x 8, :y 12} {:x 9, :y 16} {:x 10, :y 11} {:x 11, :y 19} {:x 12, :y 13} {:x 13, :y 10} {:x 14, :y 25} {:x 15, :y 14} {:x 16, :y 10} {:x 17, :y 18} {:x 18, :y 14} {:x 19, :y 17} {:x 20, :y 13} {:x 21, :y 16} {:x 22, :y 40} {:x 23, :y 19} {:x 24, :y 20} {:x 25, :y 15} {:x 26, :y 20} {:x 27, :y 11} {:x 28, :y 23} {:x 29, :y 10} {:x 30, :y 20} {:x 31, :y 17} {:x 32, :y 12} {:x 33, :y 10} {:x 34, :y 13} {:x 35, :y 30} {:x 36, :y 23} {:x 37, :y 13} {:x 38, :y 12} {:x 39, :y 19} {:x 40, :y 17} {:x 41, :y 21} {:x 42, :y 16} {:x 43, :y 22} {:x 44, :y 18} {:x 45, :y 21} {:x 46, :y 19} {:x 47, :y 12} {:x 48, :y 19} {:x 49, :y 11} {:x 50, :y 11} {:x 51, :y 6})}], :marks [{:type \"line\", :from {:data \"078610a8-90de-45cf-8f3e-17a01e422468\"}, :properties {:enter {:x {:scale \"x\", :field \"data.x\"}, :y {:scale \"y\", :field \"data.y\"}, :stroke {:value \"#FF29D2\"}, :strokeWidth {:value 2}, :strokeOpacity {:value 1}}}}], :scales [{:name \"x\", :type \"linear\", :range \"width\", :zero false, :domain {:data \"078610a8-90de-45cf-8f3e-17a01e422468\", :field \"data.x\"}} {:name \"y\", :type \"linear\", :range \"height\", :nice true, :zero false, :domain {:data \"078610a8-90de-45cf-8f3e-17a01e422468\", :field \"data.y\"}}], :axes [{:type \"x\", :scale \"x\"} {:type \"y\", :scale \"y\"}]}}"}
+;; <=
+
+;; @@
+;; total number of quotes per post, by week, aggregated by how many posts have that number of quotes
+
+;; the number of quotes per post distribute normally from 15 or so
+
+(plot/histogram (->> (stats/pt -1)
+                     (sort-by #(get-in % [:prelude :CREATED]))
+                     (sequence stats/quote-count-per-post))
+                :bins 15)
+;; @@
+;; =>
+;;; {"type":"vega","content":{"width":400,"height":247.2187957763672,"padding":{"top":10,"left":55,"bottom":40,"right":10},"data":[{"name":"9ddcd438-dcbd-475c-97c3-256cf4a929e6","values":[{"x":6.0,"y":0},{"x":8.266666666666667,"y":1.0},{"x":10.533333333333335,"y":4.0},{"x":12.800000000000002,"y":9.0},{"x":15.06666666666667,"y":8.0},{"x":17.333333333333336,"y":8.0},{"x":19.6,"y":7.0},{"x":21.866666666666667,"y":5.0},{"x":24.133333333333333,"y":3.0},{"x":26.4,"y":2.0},{"x":28.666666666666664,"y":1.0},{"x":30.93333333333333,"y":1.0},{"x":33.199999999999996,"y":0.0},{"x":35.46666666666666,"y":0.0},{"x":37.73333333333333,"y":2.0},{"x":39.99999999999999,"y":0.0},{"x":42.26666666666666,"y":1.0},{"x":44.533333333333324,"y":0}]}],"marks":[{"type":"line","from":{"data":"9ddcd438-dcbd-475c-97c3-256cf4a929e6"},"properties":{"enter":{"x":{"scale":"x","field":"data.x"},"y":{"scale":"y","field":"data.y"},"interpolate":{"value":"step-before"},"fill":{"value":"steelblue"},"fillOpacity":{"value":0.4},"stroke":{"value":"steelblue"},"strokeWidth":{"value":2},"strokeOpacity":{"value":1}}}}],"scales":[{"name":"x","type":"linear","range":"width","zero":false,"domain":{"data":"9ddcd438-dcbd-475c-97c3-256cf4a929e6","field":"data.x"}},{"name":"y","type":"linear","range":"height","nice":true,"zero":false,"domain":{"data":"9ddcd438-dcbd-475c-97c3-256cf4a929e6","field":"data.y"}}],"axes":[{"type":"x","scale":"x"},{"type":"y","scale":"y"}]},"value":"#gorilla_repl.vega.VegaView{:content {:width 400, :height 247.2188, :padding {:top 10, :left 55, :bottom 40, :right 10}, :data [{:name \"9ddcd438-dcbd-475c-97c3-256cf4a929e6\", :values ({:x 6.0, :y 0} {:x 8.266666666666667, :y 1.0} {:x 10.533333333333335, :y 4.0} {:x 12.800000000000002, :y 9.0} {:x 15.06666666666667, :y 8.0} {:x 17.333333333333336, :y 8.0} {:x 19.6, :y 7.0} {:x 21.866666666666667, :y 5.0} {:x 24.133333333333333, :y 3.0} {:x 26.4, :y 2.0} {:x 28.666666666666664, :y 1.0} {:x 30.93333333333333, :y 1.0} {:x 33.199999999999996, :y 0.0} {:x 35.46666666666666, :y 0.0} {:x 37.73333333333333, :y 2.0} {:x 39.99999999999999, :y 0.0} {:x 42.26666666666666, :y 1.0} {:x 44.533333333333324, :y 0})}], :marks [{:type \"line\", :from {:data \"9ddcd438-dcbd-475c-97c3-256cf4a929e6\"}, :properties {:enter {:x {:scale \"x\", :field \"data.x\"}, :y {:scale \"y\", :field \"data.y\"}, :interpolate {:value \"step-before\"}, :fill {:value \"steelblue\"}, :fillOpacity {:value 0.4}, :stroke {:value \"steelblue\"}, :strokeWidth {:value 2}, :strokeOpacity {:value 1}}}}], :scales [{:name \"x\", :type \"linear\", :range \"width\", :zero false, :domain {:data \"9ddcd438-dcbd-475c-97c3-256cf4a929e6\", :field \"data.x\"}} {:name \"y\", :type \"linear\", :range \"height\", :nice true, :zero false, :domain {:data \"9ddcd438-dcbd-475c-97c3-256cf4a929e6\", :field \"data.y\"}}], :axes [{:type \"x\", :scale \"x\"} {:type \"y\", :scale \"y\"}]}}"}
+;; <=
+
+;; @@
+;; average number of quotes per link, by week, ascending order
+
+;; the average number of quotes per link seems to go from <2 to >2, starting around the 20th week
+
+(plot/list-plot (->> (stats/pt -1)
+                     (sort-by #(get-in % [:prelude :CREATED]))
+                     (sequence stats/avg-quote-count-per-link))
+                :joined true)
+;; @@
+;; =>
+;;; {"type":"vega","content":{"width":400,"height":247.2187957763672,"padding":{"top":10,"left":55,"bottom":40,"right":10},"data":[{"name":"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7","values":[{"x":0,"y":1.0},{"x":1,"y":1.3636363636363635},{"x":2,"y":2.0},{"x":3,"y":2.8461538461538463},{"x":4,"y":2.3125},{"x":5,"y":1.8},{"x":6,"y":3.125},{"x":7,"y":1.7777777777777777},{"x":8,"y":1.3333333333333333},{"x":9,"y":1.4545454545454546},{"x":10,"y":2.2},{"x":11,"y":1.2666666666666666},{"x":12,"y":1.4444444444444444},{"x":13,"y":1.4285714285714286},{"x":14,"y":1.9230769230769231},{"x":15,"y":2.0},{"x":16,"y":1.25},{"x":17,"y":1.3846153846153846},{"x":18,"y":1.1666666666666667},{"x":19,"y":1.5454545454545454},{"x":20,"y":1.4444444444444444},{"x":21,"y":1.6},{"x":22,"y":2.6666666666666665},{"x":23,"y":1.9},{"x":24,"y":2.857142857142857},{"x":25,"y":2.5},{"x":26,"y":2.2222222222222223},{"x":27,"y":1.8333333333333333},{"x":28,"y":2.5555555555555554},{"x":29,"y":2.5},{"x":30,"y":1.8181818181818181},{"x":31,"y":2.4285714285714284},{"x":32,"y":2.0},{"x":33,"y":2.0},{"x":34,"y":1.4444444444444444},{"x":35,"y":3.3333333333333335},{"x":36,"y":2.3},{"x":37,"y":2.1666666666666665},{"x":38,"y":1.7142857142857142},{"x":39,"y":2.111111111111111},{"x":40,"y":1.7},{"x":41,"y":2.625},{"x":42,"y":2.2857142857142856},{"x":43,"y":2.2},{"x":44,"y":2.25},{"x":45,"y":2.625},{"x":46,"y":2.375},{"x":47,"y":2.0},{"x":48,"y":2.375},{"x":49,"y":2.2},{"x":50,"y":2.2},{"x":51,"y":2.0}]}],"marks":[{"type":"line","from":{"data":"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7"},"properties":{"enter":{"x":{"scale":"x","field":"data.x"},"y":{"scale":"y","field":"data.y"},"stroke":{"value":"#FF29D2"},"strokeWidth":{"value":2},"strokeOpacity":{"value":1}}}}],"scales":[{"name":"x","type":"linear","range":"width","zero":false,"domain":{"data":"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7","field":"data.x"}},{"name":"y","type":"linear","range":"height","nice":true,"zero":false,"domain":{"data":"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7","field":"data.y"}}],"axes":[{"type":"x","scale":"x"},{"type":"y","scale":"y"}]},"value":"#gorilla_repl.vega.VegaView{:content {:width 400, :height 247.2188, :padding {:top 10, :left 55, :bottom 40, :right 10}, :data [{:name \"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7\", :values ({:x 0, :y 1.0} {:x 1, :y 1.3636363636363635} {:x 2, :y 2.0} {:x 3, :y 2.8461538461538463} {:x 4, :y 2.3125} {:x 5, :y 1.8} {:x 6, :y 3.125} {:x 7, :y 1.7777777777777777} {:x 8, :y 1.3333333333333333} {:x 9, :y 1.4545454545454546} {:x 10, :y 2.2} {:x 11, :y 1.2666666666666666} {:x 12, :y 1.4444444444444444} {:x 13, :y 1.4285714285714286} {:x 14, :y 1.9230769230769231} {:x 15, :y 2.0} {:x 16, :y 1.25} {:x 17, :y 1.3846153846153846} {:x 18, :y 1.1666666666666667} {:x 19, :y 1.5454545454545454} {:x 20, :y 1.4444444444444444} {:x 21, :y 1.6} {:x 22, :y 2.6666666666666665} {:x 23, :y 1.9} {:x 24, :y 2.857142857142857} {:x 25, :y 2.5} {:x 26, :y 2.2222222222222223} {:x 27, :y 1.8333333333333333} {:x 28, :y 2.5555555555555554} {:x 29, :y 2.5} {:x 30, :y 1.8181818181818181} {:x 31, :y 2.4285714285714284} {:x 32, :y 2.0} {:x 33, :y 2.0} {:x 34, :y 1.4444444444444444} {:x 35, :y 3.3333333333333335} {:x 36, :y 2.3} {:x 37, :y 2.1666666666666665} {:x 38, :y 1.7142857142857142} {:x 39, :y 2.111111111111111} {:x 40, :y 1.7} {:x 41, :y 2.625} {:x 42, :y 2.2857142857142856} {:x 43, :y 2.2} {:x 44, :y 2.25} {:x 45, :y 2.625} {:x 46, :y 2.375} {:x 47, :y 2.0} {:x 48, :y 2.375} {:x 49, :y 2.2} {:x 50, :y 2.2} {:x 51, :y 2.0})}], :marks [{:type \"line\", :from {:data \"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7\"}, :properties {:enter {:x {:scale \"x\", :field \"data.x\"}, :y {:scale \"y\", :field \"data.y\"}, :stroke {:value \"#FF29D2\"}, :strokeWidth {:value 2}, :strokeOpacity {:value 1}}}}], :scales [{:name \"x\", :type \"linear\", :range \"width\", :zero false, :domain {:data \"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7\", :field \"data.x\"}} {:name \"y\", :type \"linear\", :range \"height\", :nice true, :zero false, :domain {:data \"2541fdb3-ad15-4e1a-9d42-0addcc4b76a7\", :field \"data.y\"}}], :axes [{:type \"x\", :scale \"x\"} {:type \"y\", :scale \"y\"}]}}"}
+;; <=
+
+;; @@
+;; example raw data for average number of quotes per link, by week, ascending order, first 10
+
+(table/table-view (->> (stats/pt 10)
+                       stats/avg-quote-count-per-link-per-post
+                       (sort-by #(:CREATED (key %)))
+                       (map #(vector (:title (key %)) (:CREATED (key %)) (val %))))
+                  :columns ["title" "created_at" "average quotes per link"])
+;; @@
+;; =>
+;;; {"type":"list-like","open":"<center><table>","close":"</table></center>","separator":"\n","items":[{"type":"list-like","open":"<tr><th>","close":"</th></tr>","separator":"</th><th>","items":[{"type":"html","content":"<span class='clj-string'>&quot;title&quot;</span>","value":"\"title\""},{"type":"html","content":"<span class='clj-string'>&quot;created_at&quot;</span>","value":"\"created_at\""},{"type":"html","content":"<span class='clj-string'>&quot;average quotes per link&quot;</span>","value":"\"average quotes per link\""}],"value":"[\"title\" \"created_at\" \"average quotes per link\"]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 7/18-7/25&quot;</span>","value":"\"What I'm reading 7/18-7/25\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-07-26&quot;</span>","value":"\"2015-07-26\""},{"type":"html","content":"<span class='clj-double'>1.0</span>","value":"1.0"}],"value":"[\"What I'm reading 7/18-7/25\" \"2015-07-26\" 1.0]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 7/26-8/2&quot;</span>","value":"\"What I'm reading 7/26-8/2\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-08-02&quot;</span>","value":"\"2015-08-02\""},{"type":"html","content":"<span class='clj-double'>1.3636363636363635</span>","value":"1.3636363636363635"}],"value":"[\"What I'm reading 7/26-8/2\" \"2015-08-02\" 1.3636363636363635]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 8/3-8/10&quot;</span>","value":"\"What I'm reading 8/3-8/10\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-08-10&quot;</span>","value":"\"2015-08-10\""},{"type":"html","content":"<span class='clj-double'>2.0</span>","value":"2.0"}],"value":"[\"What I'm reading 8/3-8/10\" \"2015-08-10\" 2.0]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 8/11-8/18&quot;</span>","value":"\"What I'm reading 8/11-8/18\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-08-18&quot;</span>","value":"\"2015-08-18\""},{"type":"html","content":"<span class='clj-double'>2.8461538461538463</span>","value":"2.8461538461538463"}],"value":"[\"What I'm reading 8/11-8/18\" \"2015-08-18\" 2.8461538461538463]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 8/19-8/26&quot;</span>","value":"\"What I'm reading 8/19-8/26\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-08-27&quot;</span>","value":"\"2015-08-27\""},{"type":"html","content":"<span class='clj-double'>2.3125</span>","value":"2.3125"}],"value":"[\"What I'm reading 8/19-8/26\" \"2015-08-27\" 2.3125]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 8/27-9/3&quot;</span>","value":"\"What I'm reading 8/27-9/3\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-09-05&quot;</span>","value":"\"2015-09-05\""},{"type":"html","content":"<span class='clj-double'>1.8</span>","value":"1.8"}],"value":"[\"What I'm reading 8/27-9/3\" \"2015-09-05\" 1.8]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 9/4-9/11&quot;</span>","value":"\"What I'm reading 9/4-9/11\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-09-13&quot;</span>","value":"\"2015-09-13\""},{"type":"html","content":"<span class='clj-double'>3.125</span>","value":"3.125"}],"value":"[\"What I'm reading 9/4-9/11\" \"2015-09-13\" 3.125]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 9/12-9/19&quot;</span>","value":"\"What I'm reading 9/12-9/19\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-09-19&quot;</span>","value":"\"2015-09-19\""},{"type":"html","content":"<span class='clj-double'>1.7777777777777777</span>","value":"1.7777777777777777"}],"value":"[\"What I'm reading 9/12-9/19\" \"2015-09-19\" 1.7777777777777777]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 9/20-9/27&quot;</span>","value":"\"What I'm reading 9/20-9/27\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-09-27&quot;</span>","value":"\"2015-09-27\""},{"type":"html","content":"<span class='clj-double'>1.3333333333333333</span>","value":"1.3333333333333333"}],"value":"[\"What I'm reading 9/20-9/27\" \"2015-09-27\" 1.3333333333333333]"},{"type":"list-like","open":"<tr><td>","close":"</td></tr>","separator":"</td><td>","items":[{"type":"html","content":"<span class='clj-string'>&quot;What I&#x27;m reading 9/28-10/4&quot;</span>","value":"\"What I'm reading 9/28-10/4\""},{"type":"html","content":"<span class='clj-string'>&quot;2015-10-04&quot;</span>","value":"\"2015-10-04\""},{"type":"html","content":"<span class='clj-double'>1.4545454545454546</span>","value":"1.4545454545454546"}],"value":"[\"What I'm reading 9/28-10/4\" \"2015-10-04\" 1.4545454545454546]"}],"value":"#gorilla_repl.table.TableView{:contents ([\"What I'm reading 7/18-7/25\" \"2015-07-26\" 1.0] [\"What I'm reading 7/26-8/2\" \"2015-08-02\" 1.3636363636363635] [\"What I'm reading 8/3-8/10\" \"2015-08-10\" 2.0] [\"What I'm reading 8/11-8/18\" \"2015-08-18\" 2.8461538461538463] [\"What I'm reading 8/19-8/26\" \"2015-08-27\" 2.3125] [\"What I'm reading 8/27-9/3\" \"2015-09-05\" 1.8] [\"What I'm reading 9/4-9/11\" \"2015-09-13\" 3.125] [\"What I'm reading 9/12-9/19\" \"2015-09-19\" 1.7777777777777777] [\"What I'm reading 9/20-9/27\" \"2015-09-27\" 1.3333333333333333] [\"What I'm reading 9/28-10/4\" \"2015-10-04\" 1.4545454545454546]), :opts (:columns [\"title\" \"created_at\" \"average quotes per link\"])}"}
+;; <=
